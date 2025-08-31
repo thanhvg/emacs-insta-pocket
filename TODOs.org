@@ -1,0 +1,10 @@
+:PROPERTIES:
+:CATEGORY: emacs-insta-pocket
+:END:
+
+* TODO add folder delete
+
+* TODO improve caching 
+
+* TODO custom limit
+
