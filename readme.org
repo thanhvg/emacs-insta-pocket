@@ -15,7 +15,9 @@ Alternatively, you can install it using `package.el` by adding the following to 
 #+end_src
 
 * Usage
-To start using the `insta-pocket` package, first ensure that you have set your consumer key and secret. You can do this by adding the following to your Emacs configuration:
+To start using the `insta-pocket` package, first register for your own app at https://www.instapaper.com/main/request_oauth_consumer_token
+
+once you are approved set those keys
 #+begin_src elisp
 (setq insta-pocket-consumer-key "YOUR_CONSUMER_KEY")
 (setq insta-pocket-consumer-secret "YOUR_CONSUMER_SECRET")
@@ -43,7 +45,9 @@ M-x insta-pocket
     "X" 'insta-pocket-unstar)
 #+end_src
 
-* Key Bindings
+* Commands and Key Bindings
+=insta-pocket-add= to add url at point or manually.
+
 The following key bindings are available in the `insta-pocket-mode`:
 
 | Key  | Action                           |
@@ -57,10 +61,8 @@ The following key bindings are available in the `insta-pocket-mode`:
 | X    | Unstar the selected bookmark     |
 
 * Features
-`insta-pocket` supports the following features:
 - Manage bookmarks: view, add, archive, and organize them in folders.
-- Supports OAuth for secure authentication with Instapaper.
-- User-friendly interface utilizing `tabulated-list-mode`.
+- `tabulated-list-mode`.
 
 * License
 This package is licensed under the GNU General Public License v3. See the LICENSE file for details.
