@@ -2,3 +2,15 @@
 #+title: insta-pocket.el | instapaper client for emacs
 
 [[http://spacemacs.org][file:https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg]]
+
+* evil
+#+begin_src elisp
+(evil-define-key 'normal insta-pocket-mode-map
+    "o" 'insta-pocket-read
+    "c" 'insta-pocket-move
+    "f" 'insta-pocket-select-folder
+    "a" 'insta-pocket-archive
+    "A" 'insta-pocket-unarchive
+    "x" 'insta-pocket-star
+    "X" 'insta-pocket-unstar)
+#+end_src
