@@ -3,6 +3,34 @@
 
 [[http://spacemacs.org][file:https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg]]
 
+* Installation
+To install `insta-pocket.el`, you can clone the repository directly from GitHub:
+#+begin_src shell
+git clone https://github.com/thanhvg/emacs-insta-pocket.git
+#+end_src
+
+Alternatively, you can install it using `package.el` by adding the following to your Emacs configuration:
+#+begin_src elisp
+(package-install 'insta-pocket)
+#+end_src
+
+* Usage
+To start using the `insta-pocket` package, first ensure that you have set your consumer key and secret. You can do this by adding the following to your Emacs configuration:
+#+begin_src elisp
+(setq insta-pocket-consumer-key "YOUR_CONSUMER_KEY")
+(setq insta-pocket-consumer-secret "YOUR_CONSUMER_SECRET")
+#+end_src
+
+Once you have configured the keys, authorize your account by calling:
+#+begin_src elisp
+M-x insta-pocket-authorize
+#+end_src
+
+To launch the `insta-pocket` interface, use:
+#+begin_src elisp
+M-x insta-pocket
+#+end_src
+
 * evil
 #+begin_src elisp
 (evil-define-key 'normal insta-pocket-mode-map
@@ -14,3 +42,28 @@
     "x" 'insta-pocket-star
     "X" 'insta-pocket-unstar)
 #+end_src
+
+* Key Bindings
+The following key bindings are available in the `insta-pocket-mode`:
+
+| Key  | Action                           |
+|------|----------------------------------|
+| o    | Read the selected bookmark       |
+| c    | Move the selected bookmark       |
+| f    | Select a different folder        |
+| a    | Archive the selected bookmark    |
+| A    | Unarchive the selected bookmark  |
+| x    | Star the selected bookmark       |
+| X    | Unstar the selected bookmark     |
+
+* Features
+`insta-pocket` supports the following features:
+- Manage bookmarks: view, add, archive, and organize them in folders.
+- Supports OAuth for secure authentication with Instapaper.
+- User-friendly interface utilizing `tabulated-list-mode`.
+
+* License
+This package is licensed under the GNU General Public License v3. See the LICENSE file for details.
+
+* Contributing
+Contributions to `insta-pocket` are welcome. Please submit a pull request or open an issue on GitHub.

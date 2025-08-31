@@ -20,7 +20,43 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
+;; `insta-pocket.el` is an Emacs client for interacting with the
+;; Instapaper API, allowing users to manage their bookmarks, folders,
+;; and reading content directly from Emacs.
+
+;; This package provides functionalities such as:
+;; - Authorizing a user with their Instapaper credentials to access their
+;;   bookmarks securely via OAuth.
+;; - Retrieving a list of bookmarks along with their metadata, including
+;;   starred status and tags.
+;; - Adding new URLs to the user's Instapaper account.
+;; - Archiving or unarchiving bookmarks.
+;; - Moving bookmarks between different folders.
+;; - Starring or unstarring bookmarks to mark them for later reference.
+;; - Selecting and managing different folders for better organization of
+;;   bookmarks.
+
+;; The user interface is built around `tabulated-list-mode`, making it easy
+;; to view and interact with bookmarks in a structured format.
+;; The package utilizes the `oauth` library for handling authentication and
+;; secure API communication with the Instapaper service.
+
+;; To start using `insta-pocket`, users need to set their consumer key and
+;; secret and authorize access to their Instapaper account. Once authorized,
+;; they can manage their bookmarks directly from Emacs.
+
+;; Usage:
+;; - Use `M-x insta-pocket` to launch the Insta Pocket interface.
+;; - Use the key bindings within the mode to interact with bookmarks. For
+;;   instance, "o" to read, "a" to archive, and more.
+
+;; Ensure that required libraries like `oauth` are installed before using this
+;; package. This package is licensed under the GNU General Public License v3.
+
 ;;; Code:
+
 
 (require 'oauth)
 (require 'tabulated-list)
@@ -31,14 +67,23 @@
 (require 'url-util)
 
 (defconst insta-pocket-base-url
-  "https://www.instapaper.com/api/1.1")
+  "https://www.instapaper.com/api/1.1"
+  "Base URL for the Insta Pocket API.")
 
-(defvar insta-pocket-consumer-key nil)
-(defvar insta-pocket-consumer-secret nil)
-(defvar insta-pocket-token nil)
-(defvar insta-pocket-token-secret nil)
+(defvar insta-pocket-consumer-key nil
+  "Consumer key for Insta Pocket authentication.")
+
+(defvar insta-pocket-consumer-secret nil
+  "Consumer secret for Insta Pocket authentication.")
+
+(defvar insta-pocket-token nil
+  "Access token for the authenticated user.")
+
+(defvar insta-pocket-token-secret nil
+  "Access token secret for the authenticated user.")
 
 (defun insta-pocket-authorize (username password)
+  "Authorize the user with USERNAME and PASSWORD to access Insta Pocket."
   (interactive (list
                 (read-string "username: ")
                 (read-passwd "password: ")))
@@ -50,7 +95,6 @@
                            ("x_auth_password" . ,password))
                          t))))
     (insta-pocket--parse-auth-response auth-response)))
-
 
 (defun insta-pocket--parse-auth-response (response)
   "Parse the RESPONSE string and save tokens to `insta-pocket-token` and `insta-pocket-token-secret`.
@@ -87,6 +131,7 @@
   (tablist-minor-mode))
 
 (defun insta-pocket--bookmarks-refresh (&optional use-cache)
+  "Refresh the bookmarks list, optionally using cached data if USE-CACHE is non-nil."
   (let* ((bookmarks-list (insta-pocket--get-bookmarks) )
          (bookmarks
           (if use-cache
@@ -100,7 +145,8 @@
                      bookmarks-list))))
     (mapc
      (lambda (bookmark)
-       (puthash (gethash "bookmark_id" bookmark) bookmark 
+       (puthash (gethash "bookmark_id" bookmark)
+                bookmark
                 insta-pocket--bookmarks))
      bookmarks)
     (mapc
@@ -125,11 +171,13 @@
             entries))))
 
 (defun insta-pocket ()
+  "Main entry point for Insta Pocket.
+Checks for required keys and tokens, and initializes the buffer."
   (interactive)
-  (unless (and 
+  (unless (and
            insta-pocket-consumer-key
            insta-pocket-consumer-secret)
-    (error "insta-pocket-consumer-key and insta-pocket-consumer-secret must be set"))
+    (error "Variables insta-pocket-consumer-key and insta-pocket-consumer-secret must be set"))
   (unless (and
            insta-pocket-token
            insta-pocket-token-secret)
@@ -140,6 +188,7 @@
   (tablist-revert))
 
 (defun insta-pocket--make-header (url data-a-list)
+  "Create the OAuth header for a request to URL with DATA-A-LIST parameters."
   (let* ((access-token
           (oauth-access-token--create :consumer-key insta-pocket-consumer-key
                                       :consumer-secret insta-pocket-consumer-secret
@@ -168,8 +217,8 @@
 
     (oauth--request-to-header req)))
 
-
 (defmacro insta-pocket--with-url-request (url data-a-list &rest body)
+  "Execute a URL request to URL with parameters DATA-A-LIST and body BODY."
   `(let ((url-request-method "POST")
         (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")
                                      ,@(insta-pocket--make-header url data-a-list)))
@@ -181,6 +230,7 @@
     ,@body))
 
 (defun insta-pocket--request (url data-a-list &optional no-json)
+  "Make a request to URL with DATA-A-LIST and return the response as JSON if NO-JSON is nil."
   (insta-pocket--with-url-request
    url
    data-a-list
@@ -198,6 +248,7 @@
         :false-object nil)))))
 
 (defun insta-pocket--request-async (url data-a-list)
+  "Make an asynchronous request to URL with DATA-A-LIST."
   (insta-pocket--with-url-request
    url
    data-a-list
@@ -206,6 +257,7 @@
                    (message "done")))))
 
 (defun insta-pocket--get-bookmarks ()
+  "Get the list of bookmarks from Insta Pocket."
   (insta-pocket--request
    (concat insta-pocket-base-url "/bookmarks/list")
    (if (> (hash-table-count insta-pocket--bookmarks) 0)
@@ -223,8 +275,8 @@
      `(("limit" . "500")
        ("folder_id" . ,(insta-pocket-folder-folder-id insta-pocket--active-folder))))))
 
-
 (defun insta-pocket--get-text (bookmark-id)
+  "Retrieve the text content for a bookmark identified by BOOKMARK-ID."
   (insta-pocket--request
    (concat insta-pocket-base-url "/bookmarks/get_text")
    `(("bookmark_id" . ,(format "%s" bookmark-id)))
@@ -249,59 +301,70 @@ Sample data:
   (public         nil :type integer))
 
 (defconst insta-pocket--unread-folder
-  (insta-pocket-folder-create :folder-id "unread" :title "unread"))
+  (insta-pocket-folder-create :folder-id "unread" :title "unread")
+  "Folder representing unread items.")
 
 (defconst insta-pocket--starred-folder
-  (insta-pocket-folder-create :folder-id "starred" :title "starred"))
+  (insta-pocket-folder-create :folder-id "starred" :title "starred")
+  "Folder representing starred items.")
 
 (defconst insta-pocket--archive-folder
-  (insta-pocket-folder-create :folder-id "archive" :title "archive"))
+  (insta-pocket-folder-create :folder-id "archive" :title "archive")
+  "Folder representing archived items.")
 
-(defvar insta-pocket--active-folder insta-pocket--unread-folder)
+(defvar insta-pocket--active-folder insta-pocket--unread-folder
+  "The currently active folder in the Insta Pocket.")
 
-(defvar insta-pocket--bookmarks (make-hash-table :test 'equal :size 500))
+(defvar insta-pocket--bookmarks (make-hash-table :test 'equal :size 500)
+  "Hash table to store bookmarks indexed by their ID.")
 
 (defvar insta-pocket--default-folders
   (list insta-pocket--unread-folder
     insta-pocket--starred-folder
-    insta-pocket--archive-folder))
+    insta-pocket--archive-folder)
+  "List of default folders provided by Insta Pocket.")
 
 (defvar insta-pocket--folders
-  nil)
+  nil
+  "List of folders retrieved from Insta Pocket.")
 
 (defun insta-pocket--folders-add (title)
+  "Add a new folder with the specified TITLE to Insta Pocket."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/folders/add")
    `(("title" . ,title))))
 
 (defun insta-pocket--folders-delete (folder-id)
+  "Delete the folder identified by FOLDER-ID from Insta Pocket."
   (insta-pocket--request-async
-   (concat insta-pocket-base-url "/folders/add")
+   (concat insta-pocket-base-url "/folders/delete")
    `(("folder_id" . ,folder-id))))
 
 (defun insta-pocket--folders-list ()
+  "Retrieve and return a list of folders from Insta Pocket."
   (mapcar
    (lambda (folder)
      (insta-pocket-folder-create
-      :position (gethash "postion" folder)
+      :position (gethash "position" folder)
       :folder-id (number-to-string (gethash "folder_id" folder))
       :title (gethash "title" folder)
       :display-title (gethash "display_title" folder)
       :type (gethash "type" folder)
       :slug (gethash "slug" folder)
-      :sync-to-mobile (gethash "synch_to_mobile" folder)
+      :sync-to-mobile (gethash "sync_to_mobile" folder)
       :public (gethash "public" folder)))
    (insta-pocket--request
     (concat insta-pocket-base-url "/folders/list")
     nil)))
 
 (defun insta-pocket--get-folders ()
-  "get if necessary"
+  "Get and return the list of folders, loading if necessary."
   (unless insta-pocket--folders
     (setq insta-pocket--folders (append insta-pocket--default-folders (insta-pocket--folders-list))))
   insta-pocket--folders)
 
 (defun insta-pocket-select-folder (folder-title)
+  "Select the folder with the specified FOLDER-TITLE."
   (interactive
    (list (completing-read
           "Select folder: "
@@ -315,21 +378,23 @@ Sample data:
                                        (lambda (it)
                                          (string= folder-title (insta-pocket-folder-title it)))
                                        (insta-pocket--get-folders)))))
+
 (defun insta-pocket-get-url-under-point ()
-  "Try to figure out is there any URL under point.
-Returns nil if none."
+  "Attempt to locate a URL under the current point.
+Returns nil if no URL found."
   (let ((url (get-text-property (point) 'shr-url)))
     (if url
         url
       (browse-url-url-at-point))))
 
 (defun insta-pocket--add-url (url)
+  "Add the specified URL to Insta Pocket."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/add")
    `(("url" . ,url))))
 
 (defun insta-pocket-add (url)
-  "Read URL and ... it."
+  "Prompt for a URL to add to Insta Pocket."
   (interactive
    (let* ((url (insta-pocket-get-url-under-point))
           (prompt (if url
@@ -340,6 +405,7 @@ Returns nil if none."
   (insta-pocket--add-url url))
 
 (defun insta-pocket-read (bookmark-id)
+  "Read the content of the bookmark identified by BOOKMARK-ID."
   (interactive (list (tabulated-list-get-id)))
   (let ((text (insta-pocket--get-text bookmark-id)  )
         (buffer (get-buffer-create "*insta-pocket-read*")))
@@ -353,33 +419,38 @@ Returns nil if none."
     (switch-to-buffer buffer)))
 
 (defun insta-pocket--archive (bookmark-id)
+  "Archive the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/archive")
    `(("bookmark_id" . ,bookmark-id))))
 
 (defun insta-pocket--unarchive (bookmark-id)
+  "Unarchive the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/unarchive")
    `(("bookmark_id" . ,bookmark-id))))
 
 (defun insta-pocket--star (bookmark-id)
+  "Star the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/star")
    `(("bookmark_id" . ,bookmark-id))))
 
 (defun insta-pocket--unstar (bookmark-id)
+  "Unstar the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/unstar")
    `(("bookmark_id" . ,bookmark-id))))
 
 (defun insta-pocket--move (bookmark-id folder-id)
+  "Move the bookmark identified by BOOKMARK-ID to the folder identified by FOLDER-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/move")
    `(("bookmark_id" . ,bookmark-id)
      ("folder_id" . ,folder-id))))
 
-
 (defun insta-pocket-move (bookmark-id folder-title)
+  "Move the bookmark identified by BOOKMARK-ID to the folder with the specified FOLDER-TITLE."
   (interactive (list (tabulated-list-get-id)
                      (completing-read
                       "Select folder: "
@@ -404,6 +475,7 @@ Returns nil if none."
   (remhash bookmark-id insta-pocket--bookmarks))
 
 (defun insta-pocket-star (bookmark-id)
+  "Star the bookmark identified by BOOKMARK-ID."
   (interactive (list (tabulated-list-get-id)))
   (let ((bookmark (gethash bookmark-id insta-pocket--bookmarks)))
     (puthash "starred" "1" bookmark ))
@@ -412,6 +484,7 @@ Returns nil if none."
   (insta-pocket--star (number-to-string bookmark-id)))
 
 (defun insta-pocket-unstar (bookmark-id)
+  "Unstar the bookmark identified by BOOKMARK-ID."
   (interactive (list (tabulated-list-get-id)))
   (let ((bookmark (gethash bookmark-id insta-pocket--bookmarks)))
     (puthash "starred" "0" bookmark ))
@@ -422,6 +495,7 @@ Returns nil if none."
     (tabulated-list-print t)))
 
 (defun insta-pocket-archive (bookmark-id)
+  "Archive the bookmark identified by BOOKMARK-ID."
   (interactive (list (tabulated-list-get-id)))
   (unless (equal insta-pocket--active-folder insta-pocket--archive-folder)
     (remhash bookmark-id insta-pocket--bookmarks)
@@ -429,6 +503,7 @@ Returns nil if none."
     (tabulated-list-delete-entry)))
 
 (defun insta-pocket-unarchive (bookmark-id)
+  "Unarchive the bookmark identified by BOOKMARK-ID."
   (interactive (list (tabulated-list-get-id)))
   (when (equal insta-pocket--active-folder insta-pocket--archive-folder)
     (insta-pocket--unarchive (number-to-string bookmark-id))
@@ -445,6 +520,8 @@ Returns nil if none."
     (define-key map "x" 'insta-pocket-star)
     (define-key map "X" 'insta-pocket-unstar)
     map)
-  "Keymap for `insta-pocket-mode'")
+  "Keymap for `insta-pocket-mode'.")
 
 (provide 'insta-pocket)
+
+;;; insta-pocket.el ends here
