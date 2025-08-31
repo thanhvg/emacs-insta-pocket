@@ -27,6 +27,7 @@ Once you have configured the keys, authorize your account by calling:
 #+begin_src elisp
 M-x insta-pocket-authorize
 #+end_src
+This should be done only once.
 
 To launch the `insta-pocket` interface, use:
 #+begin_src elisp
@@ -45,6 +46,27 @@ M-x insta-pocket
     "X" 'insta-pocket-unstar)
 #+end_src
 
+* spacemacs
+#+begin_src elisp
+dotspacemacs-additional-packages '((insta-pocket :location (recipe
+                                                            :fetcher github
+                                                            :repo "thanhvg/emacs-insta-pocket"
+                                                            :files ("*.el"))))
+
+(defun dotspacemacs/user-config ()
+  (setq-default
+    insta-pocket-consumer-key "YOUR_CONSUMER_KEY"
+    insta-pocket-consumer-secret "YOUR_CONSUMER_SECRET")
+  (with-eval-after-load 'insta-pocket
+    (evil-define-key 'normal insta-pocket-mode-map
+        "o" 'insta-pocket-read
+        "c" 'insta-pocket-move
+        "f" 'insta-pocket-select-folder
+        "a" 'insta-pocket-archive
+        "A" 'insta-pocket-unarchive
+        "x" 'insta-pocket-star
+        "X" 'insta-pocket-unstar)))
+#+end_src
 * Commands and Key Bindings
 =insta-pocket-add= to add url at point or manually.
 
@@ -64,8 +86,5 @@ The following key bindings are available in the `insta-pocket-mode`:
 - Manage bookmarks: view, add, archive, and organize them in folders.
 - `tabulated-list-mode`.
 
-* License
-This package is licensed under the GNU General Public License v3. See the LICENSE file for details.
-
-* Contributing
-Contributions to `insta-pocket` are welcome. Please submit a pull request or open an issue on GitHub.
+* Remarks
+If possible please consider being instapaper premium user.

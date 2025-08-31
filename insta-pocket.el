@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-insta-pocket
 ;; Package-Requires: ((emacs "29.1") (oauth "1.11"))
-;; Version: 0.6.0
+;; Version: 0.0.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -82,6 +82,7 @@
 (defvar insta-pocket-token-secret nil
   "Access token secret for the authenticated user.")
 
+;;;###autoload
 (defun insta-pocket-authorize (username password)
   "Authorize the user with USERNAME and PASSWORD to access Insta Pocket."
   (interactive (list
@@ -170,6 +171,7 @@
              insta-pocket--bookmarks)
             entries))))
 
+;;;###autoload
 (defun insta-pocket ()
   "Main entry point for Insta Pocket.
 Checks for required keys and tokens, and initializes the buffer."
