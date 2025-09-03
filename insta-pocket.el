@@ -109,7 +109,8 @@
         ;; Save tokens to the Emacs cache folder (adjust path as needed)
         (with-temp-file (expand-file-name "insta-pocket-tokens.el" user-emacs-directory)
           (insert (format "(setq insta-pocket-token \"%s\")\n" insta-pocket-token))
-          (insert (format "(setq insta-pocket-token-secret \"%s\")\n" insta-pocket-token-secret))))
+          (insert (format "(setq insta-pocket-token-secret \"%s\")\n" insta-pocket-token-secret)))
+        (message "App authorized successfully."))
     (error "Response format does not match expected pattern")))
 
 (defun insta-pocket--load-tokens ()
@@ -395,6 +396,7 @@ Returns nil if no URL found."
    (concat insta-pocket-base-url "/bookmarks/add")
    `(("url" . ,url))))
 
+;;;###autoload
 (defun insta-pocket-add (url)
   "Prompt for a URL to add to Insta Pocket."
   (interactive
@@ -527,3 +529,4 @@ Returns nil if no URL found."
 (provide 'insta-pocket)
 
 ;;; insta-pocket.el ends here
+
