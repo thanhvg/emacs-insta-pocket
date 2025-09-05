@@ -489,13 +489,27 @@ Identified by BOOKMARK-ID to the folder with the specified FOLDER-TITLE."
            folder-title)
   (remhash bookmark-id insta-pocket--bookmarks))
 
+(defun insta-pocket--modify-entry (idx val)
+  "Modify the column IDX with VAL.
+IDX start from 0. This deletes the entry and put it back"
+  ;; manualy delete and add modify entry
+  (when-let* ((point-org (point))
+              (entry (tabulated-list-delete-entry)))
+    (tabulated-list-print-entry (car entry)
+                                (let ((cols (cadr entry)))
+                                  (aset cols idx val)
+                                  cols))
+    (goto-char point-org)))
+
 (defun insta-pocket-star (bookmark-id)
   "Star the bookmark identified by BOOKMARK-ID."
   (interactive (list (tabulated-list-get-id)))
   (let ((bookmark (gethash bookmark-id insta-pocket--bookmarks)))
-    (puthash "starred" "1" bookmark ))
-  (insta-pocket--bookmarks-refresh t)
-  (tabulated-list-print t)
+    (puthash "starred" "1" bookmark))
+
+  ;; (insta-pocket--bookmarks-refresh t)
+  ;; (tabulated-list-print t)
+  (insta-pocket--modify-entry 3 "x")
   (insta-pocket--star (number-to-string bookmark-id)))
 
 (defun insta-pocket-unstar (bookmark-id)
@@ -506,8 +520,9 @@ Identified by BOOKMARK-ID to the folder with the specified FOLDER-TITLE."
   (insta-pocket--unstar (number-to-string bookmark-id))
   (if (equal insta-pocket--active-folder insta-pocket--starred-folder)
       (tabulated-list-delete-entry)
-    (insta-pocket--bookmarks-refresh t)
-    (tabulated-list-print t)))
+    ;; (insta-pocket--bookmarks-refresh t)
+    ;; (tabulated-list-print t)
+    (insta-pocket--modify-entry 3 "")))
 
 (defun insta-pocket-archive (bookmark-id)
   "Archive the bookmark identified by BOOKMARK-ID."

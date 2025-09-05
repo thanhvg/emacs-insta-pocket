@@ -8,3 +8,25 @@
 
 * TODO custom limit
 
+* TODO modify list in place
+delete then insert
+
+(defun tabulated-list-delete-entry ()
+  "Delete the Tabulated List entry at point.
+Return a list (ID COLS), where ID is the ID of the deleted entry
+and COLS is a vector of its column descriptors.  Move point to
+the beginning of the deleted entry.  Return nil if there is no
+entry at point.
+
+This function only changes the buffer contents; it does not alter
+`tabulated-list-entries'."
+  ;; Assume that each entry occupies one line.
+  (let* ((id (tabulated-list-get-id))
+	 (cols (tabulated-list-get-entry))
+	 (inhibit-read-only t))
+    (when cols
+      (delete-region (pos-bol) (1+ (pos-eol)))
+      (list id cols))))
+
+["2025-09-04" "archive" "" "" ("" face link help-echo "https://thehill.com/homenews/senate/5485147-mcconnell-theres-certain-similarities-right-now-to-the-30s/")]
+(tabulated-list-print-entry 1 ["2025-09-04" "archive" "" "" ("" face link help-echo "wat")])
