@@ -306,7 +306,8 @@ Return the response as JSON if NO-JSON is nil."
    data-a-list
    (url-retrieve url
                  (lambda (_status)
-                   (message (or msg "done"))))))
+                   (when msg
+                     (message msg))))))
 
 (defun insta-pocket--get-bookmarks ()
   "Get the list of bookmarks from Insta Pocket."
@@ -423,7 +424,6 @@ Returns nil if no URL found."
       (let (buffer-read-only)
         (erase-buffer)
         (insert text)
-        ;; shr-render-buffer will start own *html* buffer, so use shr-render-region
         (shr-render-region (point-min) (point-max))
         (goto-char (point-min))))
     (switch-to-buffer buffer)))
@@ -432,29 +432,25 @@ Returns nil if no URL found."
   "Archive the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/archive")
-   `(("bookmark_id" . ,bookmark-id))
-   (format "Insta Pocket bookmark id %s archived." bookmark-id)))
+   `(("bookmark_id" . ,bookmark-id))))
 
 (defun insta-pocket--unarchive (bookmark-id)
   "Unarchive the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/unarchive")
-   `(("bookmark_id" . ,bookmark-id))
-   (format "Insta Pocket bookmark id %s unarchived." bookmark-id)))
+   `(("bookmark_id" . ,bookmark-id))))
 
 (defun insta-pocket--star (bookmark-id)
   "Star the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/star")
-   `(("bookmark_id" . ,bookmark-id))
-   (format "Insta Pocket bookmark id %s starred." bookmark-id)))
+   `(("bookmark_id" . ,bookmark-id))))
 
 (defun insta-pocket--unstar (bookmark-id)
   "Unstar the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/unstar")
-   `(("bookmark_id" . ,bookmark-id))
-   (format "Insta Pocket bookmark id %s unstarred." bookmark-id)))
+   `(("bookmark_id" . ,bookmark-id))))
 
 (defun insta-pocket--move (bookmark-id folder-id)
   "Move the bookmark.
@@ -462,8 +458,7 @@ Identified by BOOKMARK-ID to the folder identified by FOLDER-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/move")
    `(("bookmark_id" . ,bookmark-id)
-     ("folder_id" . ,folder-id))
-   (format "Insta Pocket bookmark id %s moved to folder id %id." bookmark-id folder-id)))
+     ("folder_id" . ,folder-id))))
 
 (defun insta-pocket-move (bookmark-id folder-title)
   "Move the bookmark.
@@ -489,6 +484,9 @@ Identified by BOOKMARK-ID to the folder with the specified FOLDER-TITLE."
                                  insta-pocket--folders)))
 
   (tabulated-list-delete-entry)
+  (message "Move `%s` to folder %s."
+           (gethash "title" (gethash bookmark-id insta-pocket--bookmarks))
+           folder-title)
   (remhash bookmark-id insta-pocket--bookmarks))
 
 (defun insta-pocket-star (bookmark-id)
@@ -515,6 +513,8 @@ Identified by BOOKMARK-ID to the folder with the specified FOLDER-TITLE."
   "Archive the bookmark identified by BOOKMARK-ID."
   (interactive (list (tabulated-list-get-id)))
   (unless (equal insta-pocket--active-folder insta-pocket--archive-folder)
+    (message "Archive `%s`."
+             (gethash "title" (gethash bookmark-id insta-pocket--bookmarks)))
     (remhash bookmark-id insta-pocket--bookmarks)
     (insta-pocket--archive (number-to-string bookmark-id))
     (tabulated-list-delete-entry)))
@@ -523,6 +523,8 @@ Identified by BOOKMARK-ID to the folder with the specified FOLDER-TITLE."
   "Unarchive the bookmark identified by BOOKMARK-ID."
   (interactive (list (tabulated-list-get-id)))
   (when (equal insta-pocket--active-folder insta-pocket--archive-folder)
+    (message "Unarchive `%s`."
+           (gethash "title" (gethash bookmark-id insta-pocket--bookmarks)))
     (insta-pocket--unarchive (number-to-string bookmark-id))
     (remhash bookmark-id insta-pocket--bookmarks)
     (tabulated-list-delete-entry)))
