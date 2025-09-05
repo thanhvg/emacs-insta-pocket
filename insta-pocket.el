@@ -397,7 +397,8 @@ Returns nil if no URL found."
   "Add the specified URL to Insta Pocket."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/add")
-   `(("url" . ,url))))
+   `(("url" . ,url))
+   (format "Insta Pocket %s added" url)))
 
 ;;;###autoload
 (defun insta-pocket-add (url)
@@ -418,36 +419,42 @@ Returns nil if no URL found."
         (buffer (get-buffer-create "*insta-pocket-read*")))
 
     (with-current-buffer buffer
-      (save-excursion
+      (special-mode)
+      (let (buffer-read-only)
         (erase-buffer)
         (insert text)
         ;; shr-render-buffer will start own *html* buffer, so use shr-render-region
-        (shr-render-region (point-min) (point-max))))
+        (shr-render-region (point-min) (point-max))
+        (goto-char (point-min))))
     (switch-to-buffer buffer)))
 
 (defun insta-pocket--archive (bookmark-id)
   "Archive the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/archive")
-   `(("bookmark_id" . ,bookmark-id))))
+   `(("bookmark_id" . ,bookmark-id))
+   (format "Insta Pocket bookmark id %s archived." bookmark-id)))
 
 (defun insta-pocket--unarchive (bookmark-id)
   "Unarchive the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/unarchive")
-   `(("bookmark_id" . ,bookmark-id))))
+   `(("bookmark_id" . ,bookmark-id))
+   (format "Insta Pocket bookmark id %s unarchived." bookmark-id)))
 
 (defun insta-pocket--star (bookmark-id)
   "Star the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/star")
-   `(("bookmark_id" . ,bookmark-id))))
+   `(("bookmark_id" . ,bookmark-id))
+   (format "Insta Pocket bookmark id %s starred." bookmark-id)))
 
 (defun insta-pocket--unstar (bookmark-id)
   "Unstar the bookmark identified by BOOKMARK-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/unstar")
-   `(("bookmark_id" . ,bookmark-id))))
+   `(("bookmark_id" . ,bookmark-id))
+   (format "Insta Pocket bookmark id %s unstarred." bookmark-id)))
 
 (defun insta-pocket--move (bookmark-id folder-id)
   "Move the bookmark.
@@ -455,7 +462,8 @@ Identified by BOOKMARK-ID to the folder identified by FOLDER-ID."
   (insta-pocket--request-async
    (concat insta-pocket-base-url "/bookmarks/move")
    `(("bookmark_id" . ,bookmark-id)
-     ("folder_id" . ,folder-id))))
+     ("folder_id" . ,folder-id))
+   (format "Insta Pocket bookmark id %s moved to folder id %id." bookmark-id folder-id)))
 
 (defun insta-pocket-move (bookmark-id folder-title)
   "Move the bookmark.
