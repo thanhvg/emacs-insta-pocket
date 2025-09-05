@@ -466,7 +466,7 @@ Identified by BOOKMARK-ID to the folder identified by FOLDER-ID."
 Identified by BOOKMARK-ID to the folder with the specified FOLDER-TITLE."
   (interactive (list (tabulated-list-get-id)
                      (completing-read
-                      "Select folder to move this bookmark: "
+                      "Select folder to move this item: "
                       (mapcar
                        (lambda (folder-data)
                          (insta-pocket-folder-title folder-data))
