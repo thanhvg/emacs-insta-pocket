@@ -87,14 +87,21 @@ The following key bindings are available in the `insta-pocket-mode`:
 | x    | Star the selected bookmark       |
 | X    | Unstar the selected bookmark     |
 
+Other commands from [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Tabulated-List-Mode.html][tabulated-list-mode]] and [[https://github.com/politza/tablist][tablist]] should work. For example ~tablist-revert~ to refresh.
+
 * Features
 - Manage bookmarks: view, add, archive, and organize them in folders.
-- `tabulated-list-mode`.
+- =tabulated-list-mode=.
+- =tablist=
 
 * Remarks
 - If possible please consider being instapaper premium user.
 - Number of items is capped at 500 by instapaper, cannot get more.
 * References
+https://www.instapaper.com/api
+
 https://github.com/ochronus/instapaper-go-client
+
 https://github.com/sanel/declutter
+
 https://github.com/unmonoqueteclea/jira.el
