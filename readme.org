@@ -7,29 +7,26 @@
 
 * Installation
 To install `insta-pocket.el`, you can clone the repository directly from GitHub:
-#+begin_src shell
-git clone https://github.com/thanhvg/emacs-insta-pocket.git
+#+begin_src elisp
+(use-package insta-pocket
+  :vc (:url "https://github.com/thanhvg/emacs-insta-pocket.git"))
 #+end_src
 
-Alternatively, you can install it using `package.el` by adding the following to your Emacs configuration:
-#+begin_src elisp
-(package-install 'insta-pocket)
-#+end_src
 
 * Usage
 To start using the `insta-pocket` package, first register for your own app at https://www.instapaper.com/main/request_oauth_consumer_token
 
-once you are approved set those keys
+Once you are approved set those keys
 #+begin_src elisp
 (setq insta-pocket-consumer-key "YOUR_CONSUMER_KEY")
 (setq insta-pocket-consumer-secret "YOUR_CONSUMER_SECRET")
 #+end_src
 
-Once you have configured the keys, authorize your account by calling:
+After that, authorize your account by calling:
 #+begin_src elisp
 M-x insta-pocket-authorize
 #+end_src
-This should be done only once.
+You will need to provide your instapaper username and password, the package will not remember or save your account credential. This should be done only once. If successfully, app token and secret will be store at =~/.emacs.d/insta-pocket-tokens.el.=
 
 To launch the `insta-pocket` interface, use:
 #+begin_src elisp
@@ -46,6 +43,12 @@ M-x insta-pocket
     "A" 'insta-pocket-unarchive
     "x" 'insta-pocket-star
     "X" 'insta-pocket-unstar)
+#+end_src
+
+* embark
+#+begin_src elisp
+(with-eval-after-load 'embark
+    (keymap-set embark-url-map "I" #'insta-pocket-add))
 #+end_src
 
 * spacemacs
@@ -89,4 +92,9 @@ The following key bindings are available in the `insta-pocket-mode`:
 - `tabulated-list-mode`.
 
 * Remarks
-If possible please consider being instapaper premium user.
+- If possible please consider being instapaper premium user.
+- Number of items is capped at 500 by instapaper, cannot get more.
+* References
+https://github.com/ochronus/instapaper-go-client
+https://github.com/sanel/declutter
+https://github.com/unmonoqueteclea/jira.el
