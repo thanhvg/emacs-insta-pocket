@@ -374,7 +374,7 @@ Return the response as JSON if NO-JSON is nil."
   "Select the folder with the specified FOLDER-TITLE."
   (interactive
    (list (completing-read
-          "Select folder: "
+          "Select folder to view: "
           (mapcar
            (lambda (folder-data)
              (insta-pocket-folder-title folder-data))
@@ -384,7 +384,8 @@ Return the response as JSON if NO-JSON is nil."
     (setq insta-pocket--active-folder (seq-find
                                        (lambda (it)
                                          (string= folder-title (insta-pocket-folder-title it)))
-                                       (insta-pocket--get-folders)))))
+                                       (insta-pocket--get-folders)))
+    (tablist-revert)))
 
 (defun insta-pocket-get-url-under-point ()
   "Attempt to locate a URL under the current point.
@@ -465,7 +466,7 @@ Identified by BOOKMARK-ID to the folder identified by FOLDER-ID."
 Identified by BOOKMARK-ID to the folder with the specified FOLDER-TITLE."
   (interactive (list (tabulated-list-get-id)
                      (completing-read
-                      "Select folder: "
+                      "Select folder to move this bookmark: "
                       (mapcar
                        (lambda (folder-data)
                          (insta-pocket-folder-title folder-data))

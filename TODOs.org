@@ -7,8 +7,8 @@
 * TODO improve caching 
 
 * TODO custom limit
-
-* TODO modify list in place
+* DONE modify list in place
+CLOSED: [2025-09-05 Fri 13:03]
 delete then insert
 
 (defun tabulated-list-delete-entry ()
@@ -30,3 +30,16 @@ This function only changes the buffer contents; it does not alter
 
 ["2025-09-04" "archive" "" "" ("" face link help-echo "https://thehill.com/homenews/senate/5485147-mcconnell-theres-certain-similarities-right-now-to-the-30s/")]
 (tabulated-list-print-entry 1 ["2025-09-04" "archive" "" "" ("" face link help-echo "wat")])
+
+(defun insta-pocket--modify-entry (idx val)
+  "Modify the column IDX with VAL.
+IDX start from 0. This deletes the entry and put it back"
+  ;; manualy delete and add modify entry
+  (when-let* ((point-org (point))
+              (entry (tabulated-list-delete-entry)))
+    (tabulated-list-print-entry (car entry)
+                                (let ((cols (cadr entry)))
+                                  (aset cols idx val)
+                                  cols))
+    (goto-char point-org)))
+* TODO bookmark details
