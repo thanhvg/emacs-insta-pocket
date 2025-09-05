@@ -281,6 +281,18 @@ Checks for required keys and tokens, and initializes the buffer."
                            "&")))
     ,@body))
 
+(defun insta-pocket--parse-json-buffer ()
+  "Read json from buffer."
+  (if (fboundp 'json-parse-buffer)
+      (json-parse-buffer
+       :object-type 'hash-table
+       :null-object nil
+       :false-object nil)
+    (let ((json-array-type 'vector)
+          (json-object-type 'hash-table)
+          (json-false nil))
+      (json-read))))
+
 (defun insta-pocket--request (url data-a-list &optional no-json)
   "Make a request to URL with DATA-A-LIST.
 Return the response as JSON if NO-JSON is nil."
@@ -294,10 +306,7 @@ Return the response as JSON if NO-JSON is nil."
      (goto-char url-http-end-of-headers)
      (if no-json
          (buffer-substring-no-properties (point) (point-max))
-       (json-parse-buffer
-        :object-type 'hash-table
-        :null-object nil
-        :false-object nil)))))
+       (insta-pocket--parse-json-buffer)))))
 
 (defun insta-pocket--request-async (url data-a-list &optional msg)
   "Make an asynchronous request to URL with DATA-A-LIST, shwo MSG when done."
