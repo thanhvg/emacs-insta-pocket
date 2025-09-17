@@ -43,3 +43,4 @@ IDX start from 0. This deletes the entry and put it back"
                                   cols))
     (goto-char point-org)))
 * TODO bookmark details
+* TODO batch action

@@ -4,7 +4,7 @@
 
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-insta-pocket
-;; Package-Requires: ((emacs "29.1") (oauth "1.11"))
+;; Package-Requires: ((emacs "29.1") (oauth "1.11") (tablist "1.0"))
 ;; Version: 0.0.1
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -211,7 +211,7 @@ Optionally using cached data if USE-CACHE is non-nil."
              (lambda (_key it)
                (push
                 `(,(gethash "bookmark_id" it)
-                  [,(format-time-string "%Y-%m-%d" (gethash "time" it))
+                  [,(format-time-string "%F" (gethash "time" it))
                    ,(insta-pocket-folder-title insta-pocket--active-folder)
                    ,(mapconcat (lambda (tags) (gethash "name" tags)) (gethash "tags" it) ",")
                    ,(if (string= (gethash "starred" it) "1") "x" "")
