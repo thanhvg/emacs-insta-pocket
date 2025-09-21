@@ -61,12 +61,15 @@
 (require 'oauth)
 (require 'tabulated-list)
 (require 'tablist)
-(require 'url)
 (require 'url-http)
+(require 'url)
 (require 'cl-lib)
 (require 'json)
 (require 'url-util)
 (require 'browse-url)
+
+;; Dynamically bound.
+(defvar url-http-end-of-headers)
 
 (defconst insta-pocket-base-url
   "https://www.instapaper.com/api/1.1"
